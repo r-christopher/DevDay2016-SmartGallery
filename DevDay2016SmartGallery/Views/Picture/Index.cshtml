@@ -1,0 +1,80 @@
+﻿@model IEnumerable<DevDay2016SmartGallery.Models.Picture>
+@{
+    ViewBag.Title = "Index";
+}
+<div class="app-bar orange" style="padding:0px 10px">
+    <form method="post" action="@Url.Action("Upload")" enctype="multipart/form-data">
+        <ul class="app-bar-menu" data-flexdirection="reverse">
+            <li>
+
+                <div class="input-control file" data-role="input">
+                    <input type="file" name="files" multiple>
+                    <button class="button"><span class="mif-folder"></span></button>
+                </div>
+            </li>
+            <li>
+                <div class="input-control" data-role="input" style="margin-left:10px;margin-top:0px">
+                    <button class="button"><span class="mif-upload"></span></button>
+                </div>
+            </li>
+        </ul>
+
+    </form>
+    <ul class="app-bar-menu place-right" data-flexdirection="reverse">
+        <li>
+            <div class="input-control text">
+                <input id="search" type="text" placeholder="Search...">
+            </div>
+        </li>
+    </ul>
+</div>
+<div class="page-content">
+    @foreach (var item in Model)
+    {
+        <div class="tile-wide fg-white" data-role="tile">
+            <div class="tile-content zooming">
+                <a data-rel="lightcase:myCollection" href="/Picture/View/@item.PictureId">
+                    <div class="slide">
+                        <div class="image-container image-format-hd" style="width: 100%;"><div class="frame"><div style="width: 100%; height: 174.375px; background-image: url(&quot;@item.PictureUrl&quot;); background-size: cover; background-repeat: no-repeat; border-radius: 0px;"></div></div></div>
+                    </div>
+                </a>
+                <div class="slide-over op-orange text-small padding10" >
+                    @item.Description
+                </div>
+                <div class="tile-label" data-pictureId="@item.PictureId">@item.Description</div>
+                <div class="faces" data-pictureId="@item.PictureId">@string.Join(";", item.Faces.Select(f => f.Person?.Name ?? "Unknown"))</div>
+                <div class="tags" data-pictureId="@item.PictureId">@string.Join(";", item.Tags.Select(t => t.Name))</div>
+            </div>
+           
+        </div>
+    }
+</div>
+<script>
+        $(document).ready(function () {
+            $("#search").keyup(function () {
+                $('.tile-wide').each(function (index) {
+                    if ($(this).find('.faces').text().toLowerCase().indexOf($("#search").val().toLowerCase()) >= 0 || $(this).find('.tags').text().toLowerCase().indexOf($("#search").val().toLowerCase()) >= 0)
+                    {
+                        $(this).show();
+                    }
+                    else
+                    {
+                        $(this).hide();
+                    }
+                });
+            });
+        });
+</script>
+<script type="text/javascript">
+	jQuery(document).ready(function($) {
+	    $('a[data-rel^=lightcase]').lightcase({
+	        shrinkFactor: 0.8,
+	        maxWidth: '100%',
+	        maxHeight: '100%',
+	        iframe: {
+	            width: '100%',
+	            height: '100%'
+	        }
+	    });
+	});
+</script>

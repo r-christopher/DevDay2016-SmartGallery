@@ -1,0 +1,133 @@
+﻿@model DevDay2016SmartGallery.Models.Picture
+@{
+    ViewBag.Title = "View";
+}
+<div class="grid" style="height:100%;margin:0;">
+    <div class="row cells2" style="height:100%">
+        <div class="cell" style="height:100%;background-color:#333333">
+            <img style="width:100%;max-height:100%;position: absolute;top: 50%;transform: translateY(-50%);" src="@Model.PictureUrl" />
+            <div style="position:absolute;bottom:0;width:100%;text-align:center;background-color:rgba(0,0,0,0.4);font-size:xx-large;padding:20px;color:white;">@Model.Description</div>
+        </div>
+        <div class="cell" style="height:100%">
+            <div class="grid">
+                <div class="row">
+                    <div class="cell">
+                        <h1><span class="icon mif-chevron-right fg-orange"></span> Faces</h1>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="cell">
+                        @if (Model.FaceAnalysed && Model.Faces.Any())
+                        {
+                            foreach (var face in Model.Faces)
+                            {
+                                <div data-role="hint"
+                                     data-hint-mode="2"
+                                     data-hint="@(face.Person == null ? "No identified" : face.Person.Name)|Gender : @face.FaceAttributes.Gender<br/>Age : @face.FaceAttributes.Age<br/>Glasses : @face.FaceAttributes.Glasses<br />Smile : @face.FaceAttributes.Smile<br/>Emotion : @face.Emotion<br/>"
+                                     data-hint-position="bottom"
+                                     data-hint-background="bg-orange"
+                                     data-hint-color="fg-white"
+                                     data-identified="@(face.Person != null)"
+                                     id="face_@face.FaceId"
+                                     class="face button fg-white @(face.FaceAttributes.Gender == "male"  ? "bg-cyan" : "bg-pink")"><span class="icon mif-user"></span>@(face.Person == null ? "No identified" : face.Person.Name)</div>
+                            }
+                        }
+                        else if (!Model.FaceAnalysed)
+                        {
+                            <button id="buttonFaces" class="button primary"><span class="icon mif-loop2"></span> Analyse</button>
+                            <div id="loaderFaces" data-role="preloader" data-type="square" data-style="color" style="display:none"></div>
+                        }
+                        else
+                        {
+                            <div>No face detected</div>
+                        }
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="cell">
+                        <h1><span class="icon mif-chevron-right fg-orange"></span> Tags</h1>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="cell">
+                        @if (Model.Tags.Any())
+                        {
+                            foreach (var tag in Model.Tags)
+                            {
+                                <div class="button"><span class="icon mif-tags"></span> @tag.Name</div>
+                            }
+                        }
+                        else
+                        {
+                            <button id="buttonTags" class="button primary"><span class="icon mif-loop2"></span> Analyse</button>
+                            <div id="loaderTags" data-role="preloader" data-type="square" data-style="color" style="display:none"></div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#buttonTags").click(function () {
+            $(this).hide();
+            $("#loaderTags").show();
+            $.ajax({
+                url: "/Picture/AnalysePicture/@Model.PictureId"
+            })
+            .done(function (data) {
+                refreshTags(data);
+                document.location.href = document.location.href;
+            });
+        });
+
+        $("#buttonFaces").click(function () {
+            $(this).hide();
+            $("#loaderFaces").show();
+            $.ajax({
+                url: "/Picture/AnalyseFaces/@Model.PictureId"
+            })
+            .done(function (data) {
+                refreshFaces(data);
+                document.location.href = document.location.href;
+            });
+        });
+
+        $(".face").click(function () {
+            var element = $(this);
+
+            if (element.data('identified') != 'False') {
+                var name = prompt("Please enter a name", '');
+
+                if (name) {
+                    var id = $(this).attr("id").split("_")[1];
+                    $.ajax({
+                        url: "/Picture/UpdatePersonName?name=" + name + "&faceId=" + id
+                    })
+                    .done(function (data) {
+                        element.html('<span class="icon mif-user"></span> ' + name);
+                        element.removeClass("face");
+                    });
+                }
+            }
+        });
+
+        function refreshTags(data) {
+            var descritpionElem = window.parent.$('.tile-label[data-pictureId="@Model.PictureId"]');
+            var tagsElem = window.parent.$('.tags[data-pictureId="@Model.PictureId"]');
+            var tags = data.Tags.join(';');
+            descritpionElem.html(data.Description);
+            tagsElem.html(tags);
+        }
+
+        function refreshFaces(data) {
+            var facesElem = window.parent.$('.faces[data-pictureId="@Model.PictureId"]');
+            var names = data.join(';');
+            facesElem.html(names);
+            console.log(names);
+            console.log(facesElem);
+        }
+    });
+</script>
