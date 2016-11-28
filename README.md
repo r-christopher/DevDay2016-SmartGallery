@@ -1,2 +1,7 @@
 # DevDay2016-SmartGallery
-Demo for the DevDay 2016 Belgium. A smart gallery which uses Microsoft Cognitive Services to describe pictures and recognize people.  
+A Demo for the DevDay 2016 Belgium which is a smart gallery which uses Microsoft Cognitive Services to describe pictures and recognize people.  
+
+APIs used in this demo are : 
+- Computer Vision
+- Emotion
+- Face
